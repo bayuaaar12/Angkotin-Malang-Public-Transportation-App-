@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Angkotin</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="google_map_api_key">AIzaSyC0h2qsxAwT8x3bgExbSGoIEaeydTuj6II</string>
+    <string name="google_map_api_key">"YOUR_API_KEY"</string>
     <string name="draw_route">Draw Route</string>
     <string name="navigation_icon_description">Navigation icon</string>
 </resources>

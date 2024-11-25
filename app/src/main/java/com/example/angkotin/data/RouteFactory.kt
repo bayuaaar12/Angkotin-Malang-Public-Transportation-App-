@@ -25,7 +25,7 @@ object RouteFactory {
                     "Jalan Simpang Sulfat Selatan 16",
                     "Jalan Hamid Rusdi 10 B"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.abb,
                 origin = CoordinatesEntity(-7.930664315480486, 112.64754633649632),
                 destination = CoordinatesEntity(-7.972865105892197, 112.64599027381796),
                 waypoints = listOf(
@@ -62,7 +62,7 @@ object RouteFactory {
                     "Jalan Raya Malang - Surabaya",
                     "Terminal Arjosari"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.abg,
                 origin = CoordinatesEntity(-8.026071863222331, 112.64294853820383),
                 destination = CoordinatesEntity(-7.933421225623797, 112.65900122439122),
                 waypoints = listOf(
@@ -106,7 +106,7 @@ object RouteFactory {
                     "Jalan Tlogomas A1",
                     "Terminal Landungsari"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.adl,
                 origin = CoordinatesEntity(-7.934589978502221, 112.65871280931385),
                 destination = CoordinatesEntity(-7.924670054710193, 112.59785174786673),
                 waypoints = listOf(
@@ -145,7 +145,7 @@ object RouteFactory {
                     "Jalan Terminal Bayangan Gadang Bumiayu",
                     "Terminal Hamid Rusdi 1"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.ajg,
                 origin = CoordinatesEntity(-7.958011875791379, 112.63819558578038),
                 destination = CoordinatesEntity(-8.026050615735757, 112.64292708053223),
                 waypoints = listOf(
@@ -191,7 +191,7 @@ object RouteFactory {
                     "Jalan Tlogomas 106",
                     "Terminal Landungsari"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.al,
                 origin = CoordinatesEntity(-7.933435458993134, 112.65899350317089),
                 destination = CoordinatesEntity(-7.924082277310615, 112.59893995005163),
                 waypoints = listOf(
@@ -235,7 +235,7 @@ object RouteFactory {
                     "Terminal Bayangan Gadang Bumiayu",
                     "Terminal Hamid Rusdi 1"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.ag,
                 origin = CoordinatesEntity(-7.933010528109448, 112.6586949893062),
                 destination = CoordinatesEntity(-8.026014108978398, 112.64288187018346),
                 waypoints = listOf(
@@ -273,7 +273,7 @@ object RouteFactory {
                     "Jalan Terminal Bayangan Gadang Bumiayu",
                     "Terminal Hamid Rusdi 2"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.amg,
                 origin = CoordinatesEntity(-7.933426299002292, 112.6589872674082),
                 destination = CoordinatesEntity(-8.026060694819119, 112.64290633701229),
                 waypoints = listOf(
@@ -324,7 +324,7 @@ object RouteFactory {
                     "Jalan Plaosan Timur 130",
                     "Jalan Raya Panjisuroso 16"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.asd,
                 origin = CoordinatesEntity(-7.933442940095821, 112.65904153390399),
                 destination = CoordinatesEntity(-7.972509579360462, 112.60755196897098),
                 waypoints = listOf(
@@ -379,7 +379,7 @@ object RouteFactory {
                     "Jalan Raya Cemorokandang 51",
                     "Jalan Raya Kedungrejo 1209"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.ckl,
                 origin = CoordinatesEntity(-7.924130048068026, 112.59893594516659),
                 destination = CoordinatesEntity(-7.983678307752278, 112.69249470860335),
                 waypoints = listOf(
@@ -421,7 +421,7 @@ object RouteFactory {
                     "Jalan Raya Malang - Surabaya 143-145",
                     "Terminal Arjosari"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.ga,
                 origin = CoordinatesEntity(-8.026034007646514, 112.64296006783054),
                 destination = CoordinatesEntity(-7.933416021476172, 112.65900141426282),
                 waypoints = listOf(
@@ -469,7 +469,7 @@ object RouteFactory {
                     "Terminal Bayangan Gadang Bumiayu",
                     "Terminal Hamid Rusidi 1"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.gl,
                 origin = CoordinatesEntity(-7.9241465956742525, 112.59893667024257),
                 destination = CoordinatesEntity(-8.02609299072131, 112.64293084675018),
                 waypoints = listOf(
@@ -517,7 +517,7 @@ object RouteFactory {
                     "Sdn Mulyorejo 3",
                     "Terminal Mulyorejo"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.gm,
                 origin = CoordinatesEntity(-7.989994430957743, 112.59932633912945),
                 destination = CoordinatesEntity(-7.990029009448435, 112.59934561157803),
                 waypoints = listOf(
@@ -564,7 +564,7 @@ object RouteFactory {
                     "Terminal Bayangan Gadang Bumiayu",
                     "Terminal Hamid Rusidi 1"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.gml,
                 origin = CoordinatesEntity(-7.925173199759928, 112.59787118275375),
                 destination = CoordinatesEntity(-8.026040058284694, 112.64296188859956),
                 waypoints = listOf(
@@ -615,7 +615,7 @@ object RouteFactory {
                     "Jalan Simpang Raya Langsep 63",
                     "Jalan Raya Langsep 70"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.jdm,
                 origin = CoordinatesEntity(-7.945032105457919, 112.58354652504526),
                 destination = CoordinatesEntity(-7.98192555207426, 112.61436717909392),
                 waypoints = listOf(
@@ -660,7 +660,7 @@ object RouteFactory {
                     "Jalan Satria Barat 439",
                     "Karanglo Indah"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.jpk,
                 origin = CoordinatesEntity(-7.943494655921913, 112.59229192417078),
                 destination = CoordinatesEntity(-7.916752923851174, 112.64516610933255),
                 waypoints = listOf(
@@ -702,7 +702,7 @@ object RouteFactory {
                     "Terminal Bayangan Gadang Bumiayu",
                     "Terminal Hamid Rusidi 1"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.ldg,
                 origin = CoordinatesEntity(-7.92425476786636, 112.59891928500502),
                 destination = CoordinatesEntity(-8.026052030223918, 112.64296579527914),
                 waypoints = listOf(
@@ -748,7 +748,7 @@ object RouteFactory {
                     "Terminal Bayangan Gadang Bumiayu",
                     "Terminal Hamid Rusidi 1"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.lg,
                 origin = CoordinatesEntity(-7.92425476786636, 112.59891928500502),
                 destination = CoordinatesEntity(-8.026031173865011, 112.64297191605718),
                 waypoints = listOf(
@@ -786,7 +786,7 @@ object RouteFactory {
                     "Jalan Pasar Besar 142",
                     "Jalan Merdeka Timur 2f"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.mk,
                 origin = CoordinatesEntity(-7.973329047954809, 112.67059925585414),
                 destination = CoordinatesEntity(-7.983606257584494, 112.63179933252084),
                 waypoints = listOf(
@@ -812,7 +812,7 @@ object RouteFactory {
                     "Jalan Danau Toba",
                     "Jalan Ki Ageng Gribig 15"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.mm,
                 origin = CoordinatesEntity(-7.990142829304203, 112.59959593828145),
                 destination = CoordinatesEntity(-7.974718247392594, 112.67239722663138),
                 waypoints = listOf(
@@ -842,7 +842,7 @@ object RouteFactory {
                     "Jalan Muharto 50",
                     "Jalan Laksamana Martadinata 38"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.mt,
                 origin = CoordinatesEntity(-8.050323746120942, 112.6622761719909),
                 destination = CoordinatesEntity(-7.988364135376067, 112.63508041418598),
                 waypoints = listOf(
@@ -873,7 +873,7 @@ object RouteFactory {
                     "Jalan Panglima Sudirman 85",
                     "Jalan Raden Tumenggung Suryo 4"
                 ),
-                logo = R.drawable.bus,
+                logo = R.drawable.tst,
                 origin = CoordinatesEntity(-8.02607950938143, 112.64297695638614),
                 destination = CoordinatesEntity(-7.966726864919944, 112.63886403396471),
                 waypoints = listOf(

@@ -1,4 +1,6 @@
+//sidebarActivity.kt
 package com.example.angkotin
+
 
 import android.content.Intent
 import android.os.Bundle
@@ -76,6 +78,8 @@ fun BusSurabayaApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home_page") { HomePage(navController) }
+
+
             composable("list_view_page") { routelistpage(navController) }
             composable("route_detail_page/{routeId}") { backStackEntry ->
                 val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
@@ -142,33 +146,37 @@ fun HomePage(navController: androidx.navigation.NavController) {
 
 @Composable
 fun MyTopBar(searchText: String, onSearchTextChange: (String) -> Unit) {
-    val height = 45.dp // Desired height for both menu and search bar
+    val context = LocalContext.current
+    val height = 45.dp
 
     var showHint by remember { mutableStateOf(searchText.isEmpty()) }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Transparent) // Transparent background
+            .background(Color.Transparent)
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Menu button with circular white background and fixed height
+        // Ubah onClick untuk membuka SidebarActivity
         IconButton(
-            onClick = { /* Handle menu button click */ },
+            onClick = {
+                val intent = Intent(context, SidebarActivity::class.java)
+                context.startActivity(intent)
+            },
             modifier = Modifier
                 .clip(CircleShape)
                 .background(Color.White)
                 .padding(8.dp)
-                .height(height) // Set fixed height
+                .height(height)
                 .width(45.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Menu,
                 contentDescription = "Menu",
                 tint = Color.Black,
-                modifier = Modifier.size(40.dp) // Adjust icon size as needed
+                modifier = Modifier.size(40.dp)
             )
         }
 

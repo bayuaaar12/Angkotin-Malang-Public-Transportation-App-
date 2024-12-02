@@ -98,9 +98,7 @@ fun SidebarScreen() {
                                     icon = Icons.Default.Home,
                                     text = "Home",
                                     onClick = {
-                                        context.startActivity(
-                                            Intent(context, MainActivity::class.java)
-                                        )
+                                        (context as? SidebarActivity)?.onBackPressed()
                                     }
                                 )
                                 Divider(color = Color.White.copy(alpha = 0.3f), thickness = 1.dp)

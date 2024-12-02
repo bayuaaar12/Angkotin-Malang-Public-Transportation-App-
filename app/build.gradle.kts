@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.angkotin"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.angkotin"
@@ -109,9 +109,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Lifecycle components
-    implementation(libs.androidx.lifecycle.extensions)
-    implementation(libs.androidx.lifecycle.common.java8)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2") // For ViewModel
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")   // For LiveData
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
     // Kotlin components
     implementation(libs.kotlin.stdlib.jdk7)

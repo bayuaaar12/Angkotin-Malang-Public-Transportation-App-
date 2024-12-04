@@ -1,8 +1,12 @@
 package com.example.angkotin.ui.screens
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,8 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import com.example.angkotin.R
 import com.example.angkotin.data.RouteEntity
@@ -25,30 +33,53 @@ import com.example.angkotin.data.RouteFactory
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.DirectionsApiRequest
 import com.google.maps.GeoApiContext
 import com.google.maps.android.PolyUtil
+import com.google.maps.android.SphericalUtil
 import com.google.maps.model.TravelMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("UseOfNonLambdaOffsetOverload")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Routedetailpage(navController: NavController, routeId: String) {
     val context = LocalContext.current
     val route = RouteFactory.getRoute(routeId) // Obtain the route details
     val mapView = remember { MapView(context) }
-
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val logoOffsetX by remember { mutableStateOf((-32).dp) }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Route Details") },
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(), // Make the Box take up full width
+                        contentAlignment = Alignment.Center // Align the content in the center
+                    ) {
+                        // Route Logo
+                        if (route != null) {
+                            Image(
+                                painter = painterResource(id = route.logo), // Replace with actual route logo
+                                contentDescription = "Route Logo",
+                                modifier = Modifier
+                                    .size(70.dp) // Adjust the size of the logo
+                                    .padding(end = 0.dp)
+                                    .offset(x = logoOffsetX)// Add padding to the right of the logo
+                            )
+                        }
+                    }
+
+                },
                 navigationIcon = {
                     IconButton(
                         onClick = { (navController.context as? Activity)?.finish() }, // Navigate back
@@ -62,20 +93,20 @@ fun Routedetailpage(navController: NavController, routeId: String) {
                             tint = Color.Black // Set icon color to black
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White // Custom top bar background color
+                )
             )
-        },
-        bottomBar = {
-            // Optional back navigation button here if needed
         }
     ) { paddingValues ->
-
         BottomSheetScaffold(
+            scaffoldState = bottomSheetScaffoldState,
             sheetContent = {
-                StreetNamesBottomSheet(route)
+                StreetNamesBottomSheet(route) // No extra drag bar here
             },
-            modifier = Modifier.padding(paddingValues),
-            sheetPeekHeight = 64.dp
+            sheetPeekHeight = 64.dp, // Minimum height when collapsed
+            modifier = Modifier.padding(paddingValues)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 // Fullscreen map
@@ -86,7 +117,6 @@ fun Routedetailpage(navController: NavController, routeId: String) {
                         mapView.getMapAsync { googleMap ->
                             setupMap(googleMap, context, route)
                             googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style))
-
                         }
                         mapView
                     },
@@ -104,21 +134,12 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
             .fillMaxWidth()
             .background(Color.White)
             .padding(16.dp)
+            .heightIn(max = 450.dp)
     ) {
-        // Top handle for dragging
-        Box(
-            modifier = Modifier
-                .width(40.dp)
-                .height(4.dp)
-                .background(Color.Gray, shape = CircleShape)
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 8.dp)
-        )
-
         // Scrollable list of stops
         LazyColumn(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxHeight()
                 .padding(vertical = 8.dp)
         ) {
             if (route != null) {
@@ -132,7 +153,7 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
-                                .background(Color(0xFF90CAF9), shape = CircleShape)
+                                .background(Color(0xFF1E88E5), shape = CircleShape)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -146,7 +167,6 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
         }
     }
 }
-
 
 fun setupMap(map: GoogleMap, context: Context, route: RouteEntity?) {
     route?.let {
@@ -189,8 +209,18 @@ fun drawRoute(map: GoogleMap?, routeId: String, context: Context) {
                     val polylineOptions = PolylineOptions()
                         .addAll(decodedPath.map { LatLng(it.latitude, it.longitude) })
                         .width(10f)
-                        .color(Color.Blue.hashCode())
+                        .color(0xFF1E88E5.toInt())
                     map.addPolyline(polylineOptions)
+                    val arrowMarkers = addArrowsToPolyline(map, decodedPath, 700, context) // Adjust arrow spacing as needed
+                    // Add camera listener to control arrow visibility
+                    map.setOnCameraIdleListener {
+                        val currentZoom = map.cameraPosition.zoom
+                        val arrowVisibility = currentZoom >= 13 // Adjust zoom threshold as needed
+
+                        arrowMarkers.forEach { marker ->
+                            marker.isVisible = arrowVisibility
+                        }
+                    }
                 } else {
                     Toast.makeText(context, "No route found", Toast.LENGTH_SHORT).show()
                 }
@@ -201,4 +231,50 @@ fun drawRoute(map: GoogleMap?, routeId: String, context: Context) {
     } else {
         Toast.makeText(context, "Invalid route ID", Toast.LENGTH_SHORT).show()
     }
+}
+
+fun addArrowsToPolyline(map: GoogleMap, points: List<LatLng>, spacing: Int, context: Context): MutableList<Marker> {    var currentDistance = 0.0
+    val arrowMarkers = mutableListOf<Marker>()
+    for (i in 0 until points.size - 1) {
+        val p1 = points[i]
+        val p2 = points[i + 1]
+        val segmentDistance = SphericalUtil.computeDistanceBetween(p1, p2)
+        currentDistance += segmentDistance
+
+
+        if (currentDistance >= spacing) {
+            currentDistance = 0.0 // Reset distance for next arrow
+
+            // Calculate arrow position (midpoint of segment)
+            val arrowPosition = SphericalUtil.interpolate(p1, p2, 0.5)
+
+            // Calculate arrow heading (bearing from p1 to p2)
+            val heading = SphericalUtil.computeHeading(p1, p2)
+
+            val arrowIcon = BitmapDescriptorFactory.fromResource(R.drawable.arrow_icon)
+            val drawable = ContextCompat.getDrawable(context, R.drawable.arrow_icon)
+            if (drawable != null) {
+                val bitmap = drawable.toBitmap(50, 50) // Scale the bitmap here
+
+                val scaledIcon = BitmapDescriptorFactory.fromBitmap(bitmap)
+
+            // Add arrow marker
+                val marker = map.addMarker(
+                MarkerOptions()
+                    .position(arrowPosition)
+                    .icon(scaledIcon)
+                    .rotation(heading.toFloat())
+                    .anchor(0.5f, 0.5f)
+                    .flat(true)
+            )
+                if (marker != null) { // Check if marker was added successfully
+                    arrowMarkers.add(marker)
+                } // Add each marker to the list
+        } else {
+            // Handle the case where the bitmap is null (e.g., log an error)
+            Log.e("addArrowsToPolyline", "Failed to convert arrow icon to bitmap")
+        }
+        }
+    }
+    return arrowMarkers // Return the list of arrow markers
 }

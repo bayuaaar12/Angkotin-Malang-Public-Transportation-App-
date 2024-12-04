@@ -258,22 +258,22 @@ fun addArrowsToPolyline(map: GoogleMap, points: List<LatLng>, spacing: Int, cont
 
                 val scaledIcon = BitmapDescriptorFactory.fromBitmap(bitmap)
 
-            // Add arrow marker
+                // Add arrow marker
                 val marker = map.addMarker(
-                MarkerOptions()
-                    .position(arrowPosition)
-                    .icon(scaledIcon)
-                    .rotation(heading.toFloat())
-                    .anchor(0.5f, 0.5f)
-                    .flat(true)
-            )
+                    MarkerOptions()
+                        .position(arrowPosition)
+                        .icon(scaledIcon)
+                        .rotation(heading.toFloat())
+                        .anchor(0.5f, 0.5f)
+                        .flat(true)
+                )
                 if (marker != null) { // Check if marker was added successfully
                     arrowMarkers.add(marker)
                 } // Add each marker to the list
-        } else {
-            // Handle the case where the bitmap is null (e.g., log an error)
-            Log.e("addArrowsToPolyline", "Failed to convert arrow icon to bitmap")
-        }
+            } else {
+                // Handle the case where the bitmap is null (e.g., log an error)
+                Log.e("addArrowsToPolyline", "Failed to convert arrow icon to bitmap")
+            }
         }
     }
     return arrowMarkers // Return the list of arrow markers

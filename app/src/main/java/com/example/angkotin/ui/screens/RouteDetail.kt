@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -133,29 +135,58 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(16.dp)
-            .heightIn(max = 450.dp)
+            .padding(0.dp)
     ) {
-        // Scrollable list of stops
+
         LazyColumn(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            if (route != null) {
-                items(route.streetNames) { streetName ->
+            if (route?.streetNames != null) {
+                itemsIndexed(route.streetNames) { index, streetName ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = 0.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
-                                .background(Color(0xFF1E88E5), shape = CircleShape)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                                .width(40.dp)
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Garis vertikal (atas dan bawah)
+                            if (index > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(5.dp)
+                                        .height(50.dp)
+                                        .align(Alignment.TopCenter)
+                                        .background(Color(0xFF1E88E5))
+                                )
+                            }
+                            if (index < route.streetNames.size - 1) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(5.dp)
+                                        .height(50.dp)
+                                        .align(Alignment.BottomCenter)
+                                        .background(Color(0xFF1E88E5))
+                                )
+                            }
+
+                            // Lingkaran indikator
+                            Box(
+                                modifier = Modifier
+                                    .size(15.dp)
+                                    .background(Color(0xFF1E88E5), shape = CircleShape)
+                                    .align(Alignment.Center)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp)) // Jarak antara lingkaran dan teks
+
+                        // Nama jalan
                         Text(
                             text = streetName,
                             style = MaterialTheme.typography.bodyLarge,

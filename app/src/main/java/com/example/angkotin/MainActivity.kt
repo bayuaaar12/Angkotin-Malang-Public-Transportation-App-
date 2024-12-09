@@ -69,6 +69,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 fun BusSurabayaApp() {
     val navController = rememberNavController()
 
+    // Show the startup screen first
+    AngkotinStartupScreen()
+
     Scaffold(
         topBar = { /* Top bar already in HomePage */ }
     ) { innerPadding ->
@@ -78,8 +81,6 @@ fun BusSurabayaApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home_page") { HomePage(navController) }
-
-
             composable("list_view_page") { routelistpage(navController) }
             composable("route_detail_page/{routeId}") { backStackEntry ->
                 val routeId = backStackEntry.arguments?.getString("routeId") ?: ""

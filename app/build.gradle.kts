@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     id("com.google.devtools.ksp") version "1.9.0-1.0.13" // Align KSP version with Room
+    id("com.google.gms.google-services")
+    //id("com.android.application")
 }
 
 android {
@@ -78,6 +80,13 @@ dependencies {
     implementation(libs.androidx.foundation.android)
     implementation(libs.transportation.consumer)
 
+    //import fire base
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-firestore-ktx:24.9.1")
+
+
+
     // Testing dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -117,4 +126,9 @@ dependencies {
     implementation(libs.kotlin.stdlib.jdk7)
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)
+
+    //firebase components
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }
+

@@ -1,4 +1,4 @@
-//sidebarActivity.kt
+//mainActivity.kt
 package com.example.angkotin
 
 
@@ -7,7 +7,10 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -28,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.angkotin.data.RouteFactory
 import com.example.angkotin.ui.screens.Routedetailpage
 import com.example.angkotin.ui.screens.routelistpage
 import com.google.android.gms.maps.GoogleMap
@@ -69,9 +73,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 fun BusSurabayaApp() {
     val navController = rememberNavController()
 
-    // Show the startup screen first
-    AngkotinStartupScreen()
-
     Scaffold(
         topBar = { /* Top bar already in HomePage */ }
     ) { innerPadding ->
@@ -81,6 +82,8 @@ fun BusSurabayaApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home_page") { HomePage(navController) }
+
+
             composable("list_view_page") { routelistpage(navController) }
             composable("route_detail_page/{routeId}") { backStackEntry ->
                 val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
@@ -133,14 +136,14 @@ fun HomePage(navController: androidx.navigation.NavController) {
             )
         }
 
-            // Routes Button at the bottom end
-            RoutesButton(onClick = {
-                val intent = Intent(context, ListRouteActivity::class.java)
-                context.startActivity(intent)
+        // Routes Button at the bottom end
+        RoutesButton(onClick = {
+            val intent = Intent(context, ListRouteActivity::class.java)
+            context.startActivity(intent)
 //                mapView?.getMapAsync { googleMap ->
 //                    drawRoute(googleMap, "1", context) // Ensure googleMap is available
 //                }
-            })
+        })
     }
 }
 
@@ -149,84 +152,138 @@ fun HomePage(navController: androidx.navigation.NavController) {
 fun MyTopBar(searchText: String, onSearchTextChange: (String) -> Unit) {
     val context = LocalContext.current
     val height = 45.dp
-
     var showHint by remember { mutableStateOf(searchText.isEmpty()) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Transparent)
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Ubah onClick untuk membuka SidebarActivity
-        IconButton(
-            onClick = {
-                val intent = Intent(context, SidebarActivity::class.java)
-                context.startActivity(intent)
-            },
+    // State untuk menyimpan hasil pencarian
+    var isSearching by remember { mutableStateOf(false) }
+    val routes = remember {
+        (1..21).mapNotNull { RouteFactory.getRoute(it.toString()) }
+    }
+
+    val filteredRoutes = remember(searchText) {
+        if (searchText.isEmpty()) {
+            emptyList()
+        } else {
+            routes.filter {
+                it.routeName.contains(searchText, ignoreCase = true)
+            }
+        }
+    }
+
+    Column {
+        Row(
             modifier = Modifier
-                .clip(CircleShape)
-                .background(Color.White)
-                .padding(8.dp)
-                .height(height)
-                .width(45.dp)
+                .fillMaxWidth()
+                .background(Color.Transparent)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Filled.Menu,
-                contentDescription = "Menu",
-                tint = Color.Black,
-                modifier = Modifier.size(40.dp)
+            IconButton(
+                onClick = {
+                    val intent = Intent(context, SidebarActivity::class.java)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .padding(8.dp)
+                    .height(height)
+                    .width(45.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Menu,
+                    contentDescription = "Menu",
+                    tint = Color.Black,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            BasicTextField(
+                value = searchText,
+                onValueChange = { newText ->
+                    onSearchTextChange(newText)
+                    showHint = newText.isEmpty()
+                    isSearching = newText.isNotEmpty()
+                },
+                modifier = Modifier
+                    .clip(RoundedCornerShape(30.dp))
+                    .background(Color.White)
+                    .padding(8.dp)
+                    .weight(1f)
+                    .height(height)
+                    .onFocusChanged { focusState ->
+                        showHint = !focusState.isFocused && searchText.isEmpty()
+                        isSearching = focusState.isFocused && searchText.isNotEmpty()
+                    },
+                textStyle = TextStyle(color = Color.Black),
+                singleLine = true,
+                decorationBox = { innerTextField ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        if (showHint) {
+                            Text(
+                                text = "Temukan rute",
+                                color = Color.Gray
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
             )
         }
 
-        Spacer(modifier = Modifier.width(10.dp))
-
-        // Search field with circular rectangle shape, white background, and fixed height
-        BasicTextField(
-            value = searchText,
-            onValueChange = { newText ->
-                onSearchTextChange(newText)
-                showHint = newText.isEmpty() // Update showHint based on text input
-            },
-            modifier = Modifier
-                .clip(RoundedCornerShape(30.dp))
-                .background(Color.White)
-                .padding(8.dp)
-                .weight(1f)
-                .height(height) // Set fixed height
-                .onFocusChanged { focusState ->
-                    showHint =
-                        !focusState.isFocused && searchText.isEmpty() // Hide hint when focused or text is present
-                },
-            textStyle = TextStyle(color = Color.Black),
-            singleLine = true,
-            decorationBox = { innerTextField ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = "Search",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(30.dp) // Adjust icon size as needed
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    if (showHint) {
-                        Text(
-                            text = "Temukan rute", // Your hint text
-                            color = Color.Gray // Adjust color as needed
-                        )
+        // Menampilkan hasil pencarian
+        if (isSearching && filteredRoutes.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp)
+            ) {
+                LazyColumn {
+                    items(filteredRoutes) { route ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    val intent = Intent(context, RouteDetailActivity::class.java)
+                                    intent.putExtra("routeId", route.id)
+                                    context.startActivity(intent)
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = route.logo),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.Unspecified
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = route.routeName,
+                                color = Color.Black
+                            )
+                        }
+                        Divider()
                     }
-                    // Place the inner text field after the icon and hint
-                    innerTextField()
                 }
             }
-        )
+        }
     }
 }
 

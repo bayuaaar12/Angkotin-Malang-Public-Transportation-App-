@@ -1,6 +1,7 @@
 package com.example.angkotin.ui.screens
 
 import android.annotation.SuppressLint
+import com.example.angkotin.data.RouteEntity
 import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.Image
@@ -34,78 +35,37 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.angkotin.ListRouteActivity
 import com.example.angkotin.RouteDetailActivity
-import com.example.angkotin.data.RouteEntity
 import androidx.compose.runtime.Composable as composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.example.angkotin.R
+import com.google.firebase.firestore.FirebaseFirestore
 
-@SuppressLint("ComposableNaming")
-@composable
-fun routelistpage(navController: NavController) {
-    val routeIds = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21") // List of available route IDs
-    val routes = routeIds.mapNotNull { RouteFactory.getRoute(it) } // Get RouteEntity objects
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White) // Set background color to white
-    ) {
-        // Back button
-        IconButton(
-            onClick = { (navController.context as? Activity)?.finish() }, // Navigate back
-            modifier = Modifier
-                .padding(5.dp)
-                .size(50.dp) // Adjust size as needed
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.Black // Set icon color to black
-            )
-        }
 
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 15.dp, vertical = 8.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            itemsIndexed(routes) { index, route -> // Use items(routes.size) to get the index
-                RouteItem(route, navController, index) // Access route using index
-                if (index < routes.size - 1) { // Add divider if not the last item
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 10.dp), // Add padding
-                        thickness = 1.5.dp, // Set divider thickness
-                        color = Color.LightGray // Set divider color
-                    )
-                }
+import com.google.firebase.firestore.ktx.toObject
+
+data class Jalur(
+    val ID_Rute: String = "",
+    val List_ID_Jalan: String = "",
+    val Nama_Rute: String = ""
+)
+
+fun getJalurData() {
+    val db = FirebaseFirestore.getInstance()
+    val jalurCollection = db.collection("Jalur")
+
+    jalurCollection.get()
+        .addOnSuccessListener { documents ->
+            for (document in documents) {
+                val jalur = document.toObject<Jalur>()
+                println("ID Rute: ${jalur.ID_Rute}")
+                println("List ID Jalan: ${jalur.List_ID_Jalan}")
+                println("Nama Rute: ${jalur.Nama_Rute}")
             }
         }
-    }
+        .addOnFailureListener { exception ->
+            println("Error getting documents: $exception")
+        }
 }
 
-@Composable
-fun RouteItem(route: RouteEntity, navController: NavController, index: Int) {
-    val context = LocalContext.current
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(15.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp)
-            .clickable {
-                val routeId = (index + 1).toString() // Route ID based on index
-                val intent = Intent(context, RouteDetailActivity::class.java).apply {
-                    putExtra("routeId", routeId) // Add routeId as an extra
-                }
-                context.startActivity(intent) // Navigate with routeId
-            }
-    ) {
-        Image(
-            painter = painterResource(id = route.logo),
-            contentDescription = "Route Logo",
-            modifier = Modifier.size(60.dp) // Reduced icon size by 50%
-        )
-        Text(
-            text = route.routeName,
-            color = Color.Black,
-            fontSize = 17.sp // Increased font size
-        ) // Set font color to black
-    }
-}

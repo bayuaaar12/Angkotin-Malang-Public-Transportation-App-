@@ -11,7 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -23,13 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import com.example.angkotin.R
+import com.example.angkotin.data.Halte
+import com.example.angkotin.data.Jalur
 import com.example.angkotin.data.RouteEntity
 import com.example.angkotin.data.RouteFactory
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.maps.DirectionsApiRequest
 import com.google.maps.GeoApiContext
 import com.google.maps.android.PolyUtil
@@ -129,64 +130,132 @@ fun Routedetailpage(navController: NavController, routeId: String) {
     }
 }
 
+// Function to fetch street names from 'halte' based on 'Jalur' data
+fun getStreetNamesFromHalte(route: RouteEntity, callback: (List<String>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+
+    // Fetch the 'Jalur' to get List_ID_Jalan (halte IDs)
+    val jalurCollection = db.collection("Jalur")
+    jalurCollection.document(route.id) // Assuming route.id corresponds to a document in 'Jalur'
+        .get()
+        .addOnSuccessListener { document ->
+            val jalur = document.toObject(Jalur::class.java)
+            val listIdJalan = jalur?.List_ID_Jalan?.split(",")?.map { it.trim() } ?: emptyList()
+
+            // Now fetch the 'halte' details using the List_ID_Jalan
+            val halteCollection = db.collection("Halte")
+            val streetNames = mutableListOf<String>()
+
+            listIdJalan.forEach { id ->
+                halteCollection.document(id) // Assuming each 'id' corresponds to a document in 'Halte'
+                    .get()
+                    .addOnSuccessListener { halteDocument ->
+                        val halte = halteDocument.toObject(Halte::class.java)
+                        halte?.Jalan?.let { streetNames.add(it) }
+
+                        // Once all street names are fetched, return the list
+                        if (streetNames.size == listIdJalan.size) {
+                            callback(streetNames)
+                        }
+                    }
+            }
+        }
+        .addOnFailureListener { exception ->
+            println("Error fetching route details: $exception")
+            callback(emptyList()) // Return empty list on failure
+        }
+}
+
+fun fetchRouteCoordinates(routeId: String, context: Context, callback: (LatLng?, LatLng?, List<LatLng>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val jalurCollection = db.collection("Jalur")
+    val halteCollection = db.collection("Halte")
+
+    // Fetch the Jalur document based on routeId
+    jalurCollection.document(routeId)
+        .get()
+        .addOnSuccessListener { jalurDoc ->
+            val jalur = jalurDoc.toObject(Jalur::class.java)
+
+            // Ensure we have the List_ID_Jalan
+            val listIdJalan = jalur?.List_ID_Jalan?.split(",")?.map { it.trim() } ?: emptyList()
+
+            val waypoints = mutableListOf<LatLng>()
+            var origin: LatLng? = null
+            var destination: LatLng? = null
+
+            // For each Halte ID in List_ID_Jalan, fetch the coordinates
+            listIdJalan.forEachIndexed { index, id ->
+                halteCollection.document(id).get()
+                    .addOnSuccessListener { halteDoc ->
+                        val halte = halteDoc.toObject(Halte::class.java)
+                        val coordinate = halte?.getLatLng()
+
+                        // Assign first and last halte as origin and destination
+                        if (coordinate != null) {
+                            if (index == 0) origin = coordinate
+                            if (index == listIdJalan.size - 1) destination = coordinate
+                            waypoints.add(coordinate)
+                        }
+
+                        // If all haltes are processed, call the callback
+                        if (waypoints.size == listIdJalan.size) {
+                            callback(origin, destination, waypoints)
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("drawRoute", "Error fetching Halte: $exception")
+                        callback(null, null, emptyList())
+                    }
+            }
+        }
+        .addOnFailureListener { exception ->
+            Log.e("drawRoute", "Error fetching Jalur: $exception")
+            callback(null, null, emptyList())
+        }
+}
+
 @Composable
 fun StreetNamesBottomSheet(route: RouteEntity?) {
+    // State to hold the street names from 'halte' collection
+    val streetNamesState = remember { mutableStateOf<List<String>>(emptyList()) }
+
+    // Fetch street names when the route is not null
+    LaunchedEffect(route) {
+        route?.let {
+            getStreetNamesFromHalte(it) { streetNames ->
+                streetNamesState.value = streetNames
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(0.dp)
+            .padding(16.dp)
+            .heightIn(max = 450.dp)
     ) {
-
+        // Scrollable list of stops
         LazyColumn(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(vertical = 8.dp)
         ) {
-            if (route?.streetNames != null) {
-                itemsIndexed(route.streetNames) { index, streetName ->
+            if (route != null) {
+                items(streetNamesState.value) { streetName ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 0.dp),
+                            .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(40.dp)
-                                .fillMaxHeight(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            // Garis vertikal (atas dan bawah)
-                            if (index > 0) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(5.dp)
-                                        .height(50.dp)
-                                        .align(Alignment.TopCenter)
-                                        .background(Color(0xFF1E88E5))
-                                )
-                            }
-                            if (index < route.streetNames.size - 1) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(5.dp)
-                                        .height(50.dp)
-                                        .align(Alignment.BottomCenter)
-                                        .background(Color(0xFF1E88E5))
-                                )
-                            }
-
-                            // Lingkaran indikator
-                            Box(
-                                modifier = Modifier
-                                    .size(15.dp)
-                                    .background(Color(0xFF1E88E5), shape = CircleShape)
-                                    .align(Alignment.Center)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp)) // Jarak antara lingkaran dan teks
-
-                        // Nama jalan
+                                .size(8.dp)
+                                .background(Color(0xFF1E88E5), shape = CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = streetName,
                             style = MaterialTheme.typography.bodyLarge,
@@ -207,60 +276,123 @@ fun setupMap(map: GoogleMap, context: Context, route: RouteEntity?) {
     }
 }
 
+//fun drawRoute(map: GoogleMap?, routeId: String, context: Context) {
+//    if (map == null) return
+//
+//    val route = RouteFactory.getRoute(routeId)
+//    if (route != null) {
+//        val geoContext = GeoApiContext.Builder()
+//            .apiKey(context.getString(R.string.google_map_api_key))
+//            .build()
+//
+//        val origin = LatLng(route.origin.latitude, route.origin.longitude)
+//        val destination = LatLng(route.destination.latitude, route.destination.longitude)
+//        val waypoints = route.waypoints.map { com.google.maps.model.LatLng(it.latitude, it.longitude) }
+//
+//        map.addMarker(MarkerOptions().position(origin).title("Origin"))
+//        map.addMarker(MarkerOptions().position(destination).title("Destination"))
+//
+//        CoroutineScope(Dispatchers.Main).launch {
+//            try {
+//                val result = DirectionsApiRequest(geoContext)
+//                    .origin(com.google.maps.model.LatLng(origin.latitude, origin.longitude))
+//                    .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
+//                    .waypoints(*waypoints.toTypedArray())
+//                    .mode(TravelMode.DRIVING)
+//                    .await()
+//
+//                if (result.routes.isNotEmpty()) {
+//                    val apiRoute = result.routes[0]
+//                    val encodedPath = apiRoute.overviewPolyline.encodedPath
+//                    val decodedPath = PolyUtil.decode(encodedPath)
+//
+//                    val polylineOptions = PolylineOptions()
+//                        .addAll(decodedPath.map { LatLng(it.latitude, it.longitude) })
+//                        .width(10f)
+//                        .color(0xFF1E88E5.toInt())
+//                    map.addPolyline(polylineOptions)
+//                    val arrowMarkers = addArrowsToPolyline(map, decodedPath, 700, context) // Adjust arrow spacing as needed
+//                    // Add camera listener to control arrow visibility
+//                    map.setOnCameraIdleListener {
+//                        val currentZoom = map.cameraPosition.zoom
+//                        val arrowVisibility = currentZoom >= 13 // Adjust zoom threshold as needed
+//
+//                        arrowMarkers.forEach { marker ->
+//                            marker.isVisible = arrowVisibility
+//                        }
+//                    }
+//                } else {
+//                    Toast.makeText(context, "No route found", Toast.LENGTH_SHORT).show()
+//                }
+//            } catch (e: Exception) {
+//                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//    } else {
+//        Toast.makeText(context, "Invalid route ID", Toast.LENGTH_SHORT).show()
+//    }
+//}
+
 fun drawRoute(map: GoogleMap?, routeId: String, context: Context) {
     if (map == null) return
 
-    val route = RouteFactory.getRoute(routeId)
-    if (route != null) {
-        val geoContext = GeoApiContext.Builder()
-            .apiKey(context.getString(R.string.google_map_api_key))
-            .build()
+    // Fetch the Jalur and Halte data for the given routeId
+    fetchRouteCoordinates(routeId, context) { origin, destination, waypoints ->
+        if (origin != null && destination != null) {
+            val geoContext = GeoApiContext.Builder()
+                .apiKey(context.getString(R.string.google_map_api_key))
+                .build()
 
-        val origin = LatLng(route.origin.latitude, route.origin.longitude)
-        val destination = LatLng(route.destination.latitude, route.destination.longitude)
-        val waypoints = route.waypoints.map { com.google.maps.model.LatLng(it.latitude, it.longitude) }
+            map.addMarker(MarkerOptions().position(origin).title("Origin"))
+            map.addMarker(MarkerOptions().position(destination).title("Destination"))
 
-        map.addMarker(MarkerOptions().position(origin).title("Origin"))
-        map.addMarker(MarkerOptions().position(destination).title("Destination"))
-
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val result = DirectionsApiRequest(geoContext)
-                    .origin(com.google.maps.model.LatLng(origin.latitude, origin.longitude))
-                    .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
-                    .waypoints(*waypoints.toTypedArray())
-                    .mode(TravelMode.DRIVING)
-                    .await()
-
-                if (result.routes.isNotEmpty()) {
-                    val apiRoute = result.routes[0]
-                    val encodedPath = apiRoute.overviewPolyline.encodedPath
-                    val decodedPath = PolyUtil.decode(encodedPath)
-
-                    val polylineOptions = PolylineOptions()
-                        .addAll(decodedPath.map { LatLng(it.latitude, it.longitude) })
-                        .width(10f)
-                        .color(0xFF1E88E5.toInt())
-                    map.addPolyline(polylineOptions)
-                    val arrowMarkers = addArrowsToPolyline(map, decodedPath, 700, context) // Adjust arrow spacing as needed
-                    // Add camera listener to control arrow visibility
-                    map.setOnCameraIdleListener {
-                        val currentZoom = map.cameraPosition.zoom
-                        val arrowVisibility = currentZoom >= 13 // Adjust zoom threshold as needed
-
-                        arrowMarkers.forEach { marker ->
-                            marker.isVisible = arrowVisibility
-                        }
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    // Ensure the waypoints are correctly ordered, excluding the origin and destination
+                    val intermediateWaypoints = waypoints.drop(1).dropLast(1) // Remove the origin and destination
+                    val googleMapsWaypoints = intermediateWaypoints.map {
+                        com.google.maps.model.LatLng(it.latitude, it.longitude)
                     }
-                } else {
-                    Toast.makeText(context, "No route found", Toast.LENGTH_SHORT).show()
+
+                    // Create the directions API request
+                    val result = DirectionsApiRequest(geoContext)
+                        .origin(com.google.maps.model.LatLng(origin.latitude, origin.longitude))
+                        .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
+                        .waypoints(*googleMapsWaypoints.toTypedArray()) // Pass waypoints
+                        .mode(TravelMode.DRIVING)
+                        .await()
+
+                    if (result.routes.isNotEmpty()) {
+                        val apiRoute = result.routes[0]
+                        val encodedPath = apiRoute.overviewPolyline.encodedPath
+                        val decodedPath = PolyUtil.decode(encodedPath)
+
+                        val polylineOptions = PolylineOptions()
+                            .addAll(decodedPath.map { LatLng(it.latitude, it.longitude) })
+                            .width(10f)
+                            .color(0xFF1E88E5.toInt())
+                        map.addPolyline(polylineOptions)
+                        val arrowMarkers = addArrowsToPolyline(map, decodedPath, 700, context) // Adjust arrow spacing as needed
+
+                        // Add camera listener to control arrow visibility
+                        map.setOnCameraIdleListener {
+                            val currentZoom = map.cameraPosition.zoom
+                            val arrowVisibility = currentZoom >= 13 // Adjust zoom threshold as needed
+
+                            arrowMarkers.forEach { marker ->
+                                marker.isVisible = arrowVisibility
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "No route found", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(context, "Invalid route coordinates", Toast.LENGTH_SHORT).show()
         }
-    } else {
-        Toast.makeText(context, "Invalid route ID", Toast.LENGTH_SHORT).show()
     }
 }
 

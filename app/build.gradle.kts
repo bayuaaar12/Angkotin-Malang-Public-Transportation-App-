@@ -83,9 +83,7 @@ dependencies {
     //import fire base
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
-    implementation ("com.google.firebase:firebase-firestore-ktx:24.9.1")
-
-
+    implementation ("com.google.firebase:firebase-firestore-ktx:25.1.1")
 
     // Testing dependencies
     testImplementation(libs.junit)
@@ -118,17 +116,15 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Lifecycle components
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2") // For ViewModel
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")   // For LiveData
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7") // For ViewModel
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")   // For LiveData
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
     // Kotlin components
     implementation(libs.kotlin.stdlib.jdk7)
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)
 
-    //firebase components
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.android.gms:play-services-maps:18.0.2")
 }
 

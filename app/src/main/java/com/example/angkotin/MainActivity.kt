@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -170,37 +172,39 @@ fun MyTopBar(searchText: String, onSearchTextChange: (String) -> Unit) {
         }
     }
 
-    Column {
-        Row(
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Menu Button
+        IconButton(
+            onClick = {
+                val intent = Intent(context, SidebarActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .clip(CircleShape)
+                .background(Color.White)
+                .padding(8.dp)
+                .height(height)
+                .width(45.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Menu,
+                contentDescription = "Menu",
+                tint = Color.Black,
+                modifier = Modifier.size(40.dp)
+            )
+        }
+
+        // Search Bar and Results
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Transparent)
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(start = 70.dp) // Adjust to avoid overlap with the menu button
         ) {
-            IconButton(
-                onClick = {
-                    val intent = Intent(context, SidebarActivity::class.java)
-                    context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(Color.White)
-                    .padding(8.dp)
-                    .height(height)
-                    .width(45.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = "Menu",
-                    tint = Color.Black,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
             BasicTextField(
                 value = searchText,
                 onValueChange = { newText ->
@@ -211,8 +215,8 @@ fun MyTopBar(searchText: String, onSearchTextChange: (String) -> Unit) {
                 modifier = Modifier
                     .clip(RoundedCornerShape(30.dp))
                     .background(Color.White)
-                    .padding(8.dp)
-                    .weight(1f)
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                    .fillMaxWidth()
                     .height(height)
                     .onFocusChanged { focusState ->
                         showHint = !focusState.isFocused && searchText.isEmpty()
@@ -244,42 +248,48 @@ fun MyTopBar(searchText: String, onSearchTextChange: (String) -> Unit) {
                     }
                 }
             )
-        }
 
-        // Menampilkan hasil pencarian
-        if (isSearching && filteredRoutes.isNotEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(horizontal = 16.dp)
-            ) {
-                LazyColumn {
-                    items(filteredRoutes) { route ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    val intent = Intent(context, RouteDetailActivity::class.java)
-                                    intent.putExtra("routeId", route.id)
-                                    context.startActivity(intent)
-                                }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(id = route.logo),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                                tint = Color.Unspecified
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                text = route.routeName,
-                                color = Color.Black
-                            )
+            // Expand search results below the search bar
+            if (isSearching && filteredRoutes.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(30.dp))
+                        .background(Color.White)
+                        .border(1.dp, Color.White, RoundedCornerShape(30.dp))
+                        .heightIn(max = 400.dp)
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.padding(10.dp)
+                    ) {
+                        items(filteredRoutes) { route ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        val intent = Intent(context, RouteDetailActivity::class.java)
+                                        intent.putExtra("routeId", route.id)
+                                        context.startActivity(intent)
+                                    }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = route.logo),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(40.dp),
+                                    tint = Color.Unspecified
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = route.routeName,
+                                    color = Color.Black,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            Divider()
                         }
-                        Divider()
                     }
                 }
             }

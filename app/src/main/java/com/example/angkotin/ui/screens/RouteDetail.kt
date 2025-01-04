@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -234,28 +235,61 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
             .fillMaxWidth()
             .background(Color.White)
             .padding(16.dp)
-            .heightIn(max = 450.dp)
     ) {
+        // Top handle for dragging
+        Box(
+            modifier = Modifier
+                .width(40.dp)
+                .height(4.dp)
+                .background(Color.Gray, shape = CircleShape)
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 8.dp)
+        )
+
         // Scrollable list of stops
         LazyColumn(
             modifier = Modifier
-                .fillMaxHeight()
+                .weight(1f)
                 .padding(vertical = 8.dp)
         ) {
             if (route != null) {
-                items(streetNamesState.value) { streetName ->
+                itemsIndexed(route.streetNames) { index, streetName ->
+                    val isLastItem = index == route.streetNames.size - 1
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = 0.dp), // Adjust vertical padding as needed (IKI LEK GA DI 0 NO Ga NYAMBUNG GARIS E)
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Column for circle and vertical line
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
-                                .background(Color(0xFF1E88E5), shape = CircleShape)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                                .width(16.dp)
+                                .fillMaxHeight(), // Ensure full height of Row
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            // Vertical line (draw only if not the last item)
+                            if (!isLastItem) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(2.dp)
+                                        .height(72.dp) // Adjust line height
+                                        .background(Color.Gray)
+                                )
+                            }
+
+                            // Circle
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .background(Color(0xFF90CAF9), shape = CircleShape)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp)) // Space between circle and text
+
+                        // Street name
                         Text(
                             text = streetName,
                             style = MaterialTheme.typography.bodyLarge,
@@ -267,6 +301,7 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
         }
     }
 }
+
 
 fun setupMap(map: GoogleMap, context: Context, route: RouteEntity?) {
     route?.let {

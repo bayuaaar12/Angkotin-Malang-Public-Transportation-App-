@@ -877,9 +877,9 @@ object RouteFactory {
                     CoordinatesEntity(-8.029175808210805, 112.63168641070595),
                     CoordinatesEntity(-8.025740793350241, 112.64290373112945),
                     CoordinatesEntity(-7.992850666760615, 112.64483388326293),
-                    CoordinatesEntity(-7.984234224687193, 112.64676349205558),
-                    CoordinatesEntity(-7.97742241572909, 112.64348943003806),
-                    CoordinatesEntity(-7.971695872221765, 112.63850155285351)
+                    CoordinatesEntity(-7.9841448636391155, 112.64635522283567),
+                    CoordinatesEntity(-7.979959498357694, 112.64181237128848),
+                    CoordinatesEntity(-7.9717784440860235, 112.63832392051216)
                 )
             )
             else -> null

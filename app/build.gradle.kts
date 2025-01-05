@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     id("com.google.devtools.ksp") version "1.9.0-1.0.13" // Align KSP version with Room
+    id("com.google.gms.google-services")
+    //id("com.android.application")
 }
 
 android {
@@ -78,6 +80,11 @@ dependencies {
     implementation(libs.androidx.foundation.android)
     implementation(libs.transportation.consumer)
 
+    //import fire base
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-firestore-ktx:25.1.1")
+
     // Testing dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -109,12 +116,15 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Lifecycle components
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2") // For ViewModel
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")   // For LiveData
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7") // For ViewModel
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")   // For LiveData
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
     // Kotlin components
     implementation(libs.kotlin.stdlib.jdk7)
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)
+
+    implementation ("com.google.android.gms:play-services-maps:18.0.2")
 }
+

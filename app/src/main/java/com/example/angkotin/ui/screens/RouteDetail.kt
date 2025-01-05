@@ -218,10 +218,10 @@ fun fetchRouteCoordinates(routeId: String, context: Context, callback: (LatLng?,
 
 @Composable
 fun StreetNamesBottomSheet(route: RouteEntity?) {
-    // State to hold the street names from 'halte' collection
+    // State untuk menyimpan nama jalan dari koleksi 'halte'
     val streetNamesState = remember { mutableStateOf<List<String>>(emptyList()) }
 
-    // Fetch street names when the route is not null
+    // Ambil nama jalan ketika route tidak null
     LaunchedEffect(route) {
         route?.let {
             getStreetNamesFromHalte(it) { streetNames ->
@@ -236,7 +236,7 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
             .background(Color.White)
             .padding(16.dp)
     ) {
-        // Top handle for dragging
+        // Indikator atas untuk dragging
         Box(
             modifier = Modifier
                 .width(40.dp)
@@ -246,7 +246,7 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
                 .padding(bottom = 8.dp)
         )
 
-        // Scrollable list of stops
+        // Daftar scrollable untuk nama jalan
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -254,46 +254,46 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
         ) {
             if (route != null) {
                 itemsIndexed(route.streetNames) { index, streetName ->
+                    val isFirstItem = index == 0
                     val isLastItem = index == route.streetNames.size - 1
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 0.dp), // Adjust vertical padding as needed (IKI LEK GA DI 0 NO Ga NYAMBUNG GARIS E)
+                            .padding(vertical = 0.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Column for circle and vertical line
                         Box(
                             modifier = Modifier
-                                .width(16.dp)
-                                .fillMaxHeight(), // Ensure full height of Row
-                            contentAlignment = Alignment.TopCenter
+                                .width(30.dp)
+                                .fillMaxHeight(),
                         ) {
-                            // Vertical line (draw only if not the last item)
-                            if (!isLastItem) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(2.dp)
-                                        .height(72.dp) // Adjust line height
-                                        .background(Color.Gray)
-                                )
-                            }
+                            // Garis vertikal
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(64.dp) // Pastikan garis mencakup tinggi penuh
+                                    .background(Color(0xFF1E88E5))
+                                    .align(Alignment.Center)
+                            )
 
-                            // Circle
+                            // Lingkaran
                             Box(
                                 modifier = Modifier
                                     .size(10.dp)
-                                    .background(Color(0xFF90CAF9), shape = CircleShape)
+                                    .background(Color(0xFF1E88E5), shape = CircleShape)
+                                    .align(Alignment.Center) // Lingkaran di tengah garis
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp)) // Space between circle and text
+                        Spacer(modifier = Modifier.width(12.dp)) // Jarak antara lingkaran dan teks
 
-                        // Street name
+                        // Teks nama jalan
                         Text(
                             text = streetName,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Black
+                            color = Color.Black,
+                            modifier = Modifier.align(Alignment.CenterVertically) // Sejajarkan teks dengan lingkaran
                         )
                     }
                 }
@@ -301,6 +301,8 @@ fun StreetNamesBottomSheet(route: RouteEntity?) {
         }
     }
 }
+
+
 
 
 fun setupMap(map: GoogleMap, context: Context, route: RouteEntity?) {
